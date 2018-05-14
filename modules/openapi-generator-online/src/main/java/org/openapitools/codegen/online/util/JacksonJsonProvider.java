@@ -20,7 +20,7 @@ package org.openapitools.codegen.online.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import io.swagger.util.Json;
+import io.swagger.v3.core.util.Json;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;

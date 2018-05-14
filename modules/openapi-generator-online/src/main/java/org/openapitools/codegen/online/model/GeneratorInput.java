@@ -19,15 +19,15 @@ package org.openapitools.codegen.online.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
 
 import java.util.Map;
 
 public class GeneratorInput {
     private JsonNode spec;
     private Map<String, String> options;
-    private String swaggerUrl;
+    private String openAPIUrl;
     private SecuritySchemeDefinition auth;
     private AuthorizationValue authorizationValue;
 
@@ -57,12 +57,12 @@ public class GeneratorInput {
     }
 
     @ApiModelProperty(example = "http://petstore.swagger.io/v2/swagger.json")
-    public String getSwaggerUrl() {
-        return swaggerUrl;
+    public String getOpenAPIUrl() {
+        return openAPIUrl;
     }
 
-    public void setSwaggerUrl(String url) {
-        this.swaggerUrl = url;
+    public void setopenAPIUrl(String url) {
+        this.openAPIUrl = url;
     }
 
     @Deprecated

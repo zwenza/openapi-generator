@@ -18,16 +18,17 @@
 package org.openapitools.codegen.online.http;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.core.models.AuthorizationValue;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.online.exception.ApiException;
 import org.openapitools.codegen.online.exception.BadRequestException;
 import org.openapitools.codegen.online.model.GeneratorInput;
 import org.openapitools.codegen.online.model.InputOption;
 import org.openapitools.codegen.online.util.ZipUtil;
-import io.swagger.models.Swagger;
-import io.swagger.models.auth.AuthorizationValue;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.util.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,19 +89,17 @@ public class Generator {
             LOGGER.debug("ignoring empty spec");
             node = null;
         }
-        Swagger swagger;
+        OpenAPI openAPI;
         if (node == null) {
-            if (opts.getSwaggerUrl() != null) {
+            if (opts.getOpenAPIUrl() != null) {
                 if (opts.getAuthorizationValue() != null) {
                     List<AuthorizationValue> authorizationValues =
                             new ArrayList<AuthorizationValue>();
                     authorizationValues.add(opts.getAuthorizationValue());
 
-                    swagger =
-                            new SwaggerParser().read(opts.getSwaggerUrl(), authorizationValues,
-                                    true);
+                    openAPI = new OpenAPIParser().readLocation(opts.getOpenAPIUrl(), authorizationValues, new ParseOptions()).getOpenAPI();
                 } else {
-                    swagger = new SwaggerParser().read(opts.getSwaggerUrl());
+                    openAPI = new OpenAPIParser().readLocation(opts.getOpenAPIUrl(), null, new ParseOptions()).getOpenAPI();
                 }
             } else {
                 throw new BadRequestException("No OpenAPI specification was supplied");
@@ -108,11 +107,11 @@ public class Generator {
         } else if (opts.getAuthorizationValue() != null) {
             List<AuthorizationValue> authorizationValues = new ArrayList<AuthorizationValue>();
             authorizationValues.add(opts.getAuthorizationValue());
-            swagger = new SwaggerParser().read(node, authorizationValues, true);
+            openAPI = new OpenAPIParser().readContents(node.toString(), authorizationValues, new ParseOptions()).getOpenAPI();
         } else {
-            swagger = new SwaggerParser().read(node, true);
+            openAPI = new OpenAPIParser().readContents(node.toString(), null, new ParseOptions()).getOpenAPI();
         }
-        if (swagger == null) {
+        if (openAPI == null) {
             throw new BadRequestException("The OpenAPI specification supplied was not valid");
         }
 
@@ -131,7 +130,7 @@ public class Generator {
         String outputFilename = outputFolder + "-bundle.zip";
 
         // TODO revise below
-        //clientOptInput.opts(clientOpts).swagger(swagger);
+        clientOptInput.opts(clientOpts).openAPI(openAPI);
 
         CodegenConfig codegenConfig = null;
         try {
@@ -142,7 +141,7 @@ public class Generator {
 
         if (opts.getOptions() != null) {
             codegenConfig.additionalProperties().putAll(opts.getOptions());
-            codegenConfig.additionalProperties().put("swagger", swagger);
+            codegenConfig.additionalProperties().put("openAPI", openAPI);
         }
 
         codegenConfig.setOutputDir(outputFolder);
